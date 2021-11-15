@@ -5,7 +5,7 @@
 
 #define NAMELEN 23
 
-char username[NAMELEN+1]  //写在内核中的全局变量
+char username[NAMELEN+1]; //写在内核中的全局变量
 
 int sys_iam(const char *name){
 
@@ -20,7 +20,7 @@ int sys_iam(const char *name){
         for(i=0;i<namelen;i++){
             username[i]=get_fs_byte(name+i);
         }
-        username[i]='\0'  //字符串的结尾符号
+        username[i]='\0';  //字符串的结尾符号
         res =namelen;
     }else{
         printk("Error,the name's length is %d,longer than 23\n",namelen);
@@ -43,7 +43,7 @@ int sys_whoami(char *name,unsigned int size){
         put_fs_byte('\0',name+i);
         res =namelen;
     }else{
-        printk("Error,the name's length is longer than %d\n",size)
+        printk("Error,the name's length is longer than %d\n",size);
         res = -(EINVAL);
     }
     return res;
