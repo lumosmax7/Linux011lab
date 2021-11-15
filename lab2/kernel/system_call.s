@@ -58,7 +58,7 @@ sa_mask = 4
 sa_flags = 8
 sa_restorer = 12
 
-nr_system_calls = 74 ;增加了两个系统调用
+nr_system_calls = 74  # 增加了两个系统调用
 
 /*
  * Ok, I get parallel printer interrupts while using the floppy for some

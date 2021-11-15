@@ -49,7 +49,7 @@ dep:
 
 ### Dependencies:
 #加入who的依赖
-who.s who.o: who.c../include/errno.h ../include/signal.h \
+who.s who.o: who.c ../include/errno.h ../include/signal.h \
   ../include/sys/types.h ../include/sys/wait.h ../include/linux/sched.h \
   ../include/linux/head.h ../include/linux/fs.h ../include/linux/mm.h \
   ../include/linux/kernel.h ../include/linux/tty.h ../include/termios.h \

@@ -9,7 +9,7 @@ char username[NAMELEN+1]; //写在内核中的全局变量
 
 int sys_iam(const char *name){
 
-    printk("Now we are in Kernel");
+    // printk("Now we are in Kernel\n");
     unsigned int namelen = 0;
     int res =-1;
     int i;
