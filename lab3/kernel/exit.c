@@ -129,6 +129,7 @@ int do_exit(long code)
 	current->state = TASK_ZOMBIE;
 	current->exit_code = code;
 	tell_father(current->father);
+	fprintk(3,"%d\t%c\t%d\n",current->pid,'E',jiffies);
 	schedule();
 	return (-1);	/* just to suppress warnings */
 }
@@ -184,6 +185,7 @@ repeat:
 		if (options & WNOHANG)
 			return 0;
 		current->state=TASK_INTERRUPTIBLE;
+		fprintk(3,"%d\t%c\t%d\n",current->pid,'W',jiffies);
 		schedule();
 		if (!(current->signal &= ~(1<<(SIGCHLD-1))))
 			goto repeat;
