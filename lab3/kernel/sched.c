@@ -57,12 +57,12 @@ union task_union {
 
 static union task_union init_task = {INIT_TASK,};
 
-long volatile jiffies=0; // 在调度中记录滴答数,jiffies记录了从开机到现在的的时钟中断数.	
+long volatile jiffies=0; /* 在调度中记录滴答数,jiffies记录了从开机到现在的的时钟中断数.	*/
 long startup_time=0;
 struct task_struct *current = &(init_task.task);
 struct task_struct *last_task_used_math = NULL;
 
-struct task_struct * task[NR_TASKS] = {&(init_task.task), };
+struct task_struct * task[NR_TASKS] = {&(init_task.task), };  
 
 long user_stack [ PAGE_SIZE>>2 ] ;
 
@@ -116,7 +116,7 @@ void schedule(void)
 				}
 			if (((*p)->signal & ~(_BLOCKABLE & (*p)->blocked)) &&
 			(*p)->state==TASK_INTERRUPTIBLE)
-				(*p)->state=TASK_RUNNING;////唤醒可中断睡眠态,进入就绪
+				(*p)->state=TASK_RUNNING;/*唤醒可中断睡眠态,进入就绪*/
 				fprintk(3,"%d\t%c\t%d\n",(*p)->pid,'J',jiffies); 
 		}
 
@@ -126,7 +126,7 @@ void schedule(void)
 		c = -1;
 		next = 0;
 		i = NR_TASKS;
-		p = &task[NR_TASKS];
+		p = &task[NR_TASKS];/* 倒序检查的 */
 		while (--i) {
 			if (!*--p)
 				continue;
@@ -136,16 +136,17 @@ void schedule(void)
 		if (c) break;
 		for(p = &LAST_TASK ; p > &FIRST_TASK ; --p)
 			if (*p)
-				(*p)->counter = ((*p)->counter >> 1) +
+				(*p)->counter = ((*p)->counter >> 1) +  /* 右移一位表示除以2 */
 						(*p)->priority;
-	}
-		/*编号为next的进程 运行*/ //TODO:没看懂
+	} /* 这里为了得到下一个执行的程序 */
+	/* 下一个执行的程序不是当前程序时, 如果当前的进程是running,但是上面的while循环判定当前程序的时间片已经用完,此时需要交出cpu使用权,进入就绪态等待 */ 
+		/*编号为next的进程 运行*/ 
 	if(current->pid != task[next] ->pid)
 	{
 		/*时间片到时程序 => 就绪*/
 		if(current->state == TASK_RUNNING)
 			fprintk(3,"%d\t%c\t%d\n",current->pid,'J',jiffies);
-		fprintk(3,"%d\t%c\t%d\n",task[next]->pid,'R',jiffies);
+		fprintk(3,"%d\t%c\t%d\n",task[next]->pid,'R',jiffies); /* 下一个程序开始运行 */
 	}
 	switch_to(next);
 }
@@ -158,7 +159,7 @@ int sys_pause(void)
 	*/
 	if(current->pid != 0)
 		fprintk(3,"%d\tW\t%d\n",current->pid,jiffies);
-	// 加入判断pid的部分是为了把进程0的等待状态去掉
+	/* 加入判断pid的部分是为了把进程0的等待状态去掉 */
 	schedule();
 	return 0;
 }
@@ -174,11 +175,11 @@ void sleep_on(struct task_struct **p)
 	tmp = *p;
 	*p = current;
 	current->state = TASK_UNINTERRUPTIBLE;
-	fprintk(3,"%d\t%c\t%d\n",current->pid,'W',jiffies); //W表示阻塞态,需要wake_up函数才能唤醒
+	fprintk(3,"%d\t%c\t%d\n",current->pid,'W',jiffies); /* W表示阻塞态,需要wake_up函数才能唤醒 */
 	schedule(); 
 	if (tmp)
-		tmp->state=0;  //这里唤醒了一个进程
-		fprintk(3,"%d\t%c\t%d\n",tmp->pid,'J',jiffies); //J表示就绪态
+		tmp->state=0;  /* 这里唤醒了一个进程 */
+		fprintk(3,"%d\t%c\t%d\n",tmp->pid,'J',jiffies); /* J表示就绪态 */
 }
 
 void interruptible_sleep_on(struct task_struct **p)
@@ -192,24 +193,24 @@ void interruptible_sleep_on(struct task_struct **p)
 	tmp=*p;
 	*p=current;
 repeat:	current->state = TASK_INTERRUPTIBLE;
-	fprintk(3,"%d\t%c\t%d\n",current->pid,'W',jiffies); //W表示阻塞态,此处不一定需要wake_up函数唤醒
+	fprintk(3,"%d\t%c\t%d\n",current->pid,'W',jiffies); /*W表示阻塞态,此处不一定需要wake_up函数唤醒*/
 	schedule();
 	if (*p && *p != current) {
 		(**p).state=0;
-		fprintk(3,"%d\t%c\t%d\n",(*p)->pid,'J',jiffies); // 当前进程进入就绪运行态
+		fprintk(3,"%d\t%c\t%d\n",(*p)->pid,'J',jiffies); /* 当前进程进入就绪运行态*/
 		goto repeat;
 	}
 	*p=NULL;
 	if (tmp)
 		tmp->state=0;
-		fprintk(3,"%d\t%c\t%d\n",tmp->pid,'J',jiffies); //原等待队列第一个进程,进入就绪态
+		fprintk(3,"%d\t%c\t%d\n",tmp->pid,'J',jiffies); /* 原等待队列第一个进程,进入就绪态*/
 }
 
 void wake_up(struct task_struct **p)
 {
 	if (p && *p) {
 		(**p).state=0;
-		fprintk(3,"%d\t%c\t%d\n",(*p)->pid,'J',jiffies); //唤醒进入就绪态
+		fprintk(3,"%d\t%c\t%d\n",(*p)->pid,'J',jiffies); /* 唤醒进入就绪态*/
 		*p=NULL;
 	}
 }
