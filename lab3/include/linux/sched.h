@@ -112,8 +112,11 @@ struct task_struct {
  *  INIT_TASK is used to set up the first task table, touch at
  * your own risk!. Base=0, limit=0x9ffff (=640kB)
  */
+
+/* 第一个state etc 对应state,counter,priority */
+
 #define INIT_TASK \
-/* state etc */	{ 0,15,15, \  /* 对应state,counter,priority */
+/* state etc */	{ 0,15,15, \  
 /* signals */	0,{{},},0, \
 /* ec,brk... */	0,0,0,0,0,0, \
 /* pid etc.. */	0,-1,0,0,0, \
