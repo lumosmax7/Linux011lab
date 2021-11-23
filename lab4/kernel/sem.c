@@ -9,7 +9,7 @@
 sem_t semaphores[SEM_COUNT]; /* 总的信号量的列表 */
 
 void init_queue(sem_queue *q){
-    q->front = q->reat = 0; /* 初始化信号量链表*/
+    q->front = q->rear = 0; /* 初始化信号量链表*/
 }
 
 int is_empty(sem_queue *q){
@@ -42,7 +42,8 @@ int insert_task(struct task_struct *p, sem_queue *q){
 }
 /* 遍历所有的信号量,查找到是否有相同的,如果有相同的,且occupied为1(表示已经打开了), 把序列号输出 */
 int sem_location(const char *name){
-    for(int i =0;i<SEM_COUNT;i++){
+    int i;
+    for(i =0;i<SEM_COUNT;i++){
         if(strcmp(name,semaphores[i].name)==0 && semaphores.occupied==1){
             return i;
         }

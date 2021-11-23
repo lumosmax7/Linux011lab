@@ -146,7 +146,7 @@ struct semaphore_queue
 	int rear;
 	struct task_struct *wait_tasks[QUE_LEN]; /* 等待的链表 */
 };
-typedef struct semaphore_queue sem_que;
+typedef struct semaphore_queue sem_queue;
 
 struct semaphore_t
 {
