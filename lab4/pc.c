@@ -21,6 +21,7 @@ _syscall1(int,sem_unlink,const char *,name);
 sem_t *empty,*full,*mutex;
 
 int fno; /*文件描述符*/
+FILE *fp;
 
 int main(){
     pid_t p;
@@ -28,7 +29,9 @@ int main(){
     int data;
     int buf_out =0; /* 读出缓冲区的指针*/
     int buf_in = 0;/* 写入缓冲区的指针*/
+
     fno = open("buffer.dat",O_CREAT|O_RDWR|O_TRUNC,0666);  /*后面都是一些定义，权限等*/
+
     /* 创建三个信号量 */
     if((mutex = sem_open("carmutex",1)) == SEM_FAILED){
         perror("sem_open() error!\n");
@@ -44,6 +47,9 @@ int main(){
         perror("sem_open() error!\n");
         return -1;
     }
+    /* TODO*/
+    lseek(fno,10*sizeof(int),SEEK_SET);
+    write(fno,(char *)&buf_out,sizeof(int));
     /* 返回0说明fork成功，为子进程*/
     /* 生产者进程*/
     if((p = fork())==0){
@@ -68,15 +74,28 @@ int main(){
             for(k=0;k<NUMBER/CHILD;k++){
                 sem_wait(full);
                 sem_wait(mutex);
+                /* TODO*/
+                lseek(fno,10*sizeof(int),SEEK_SET);
+                read(fno,(char *)&buf_out,sizeof(int));
                 /* 读入数字*/
                 lseek(fno,buf_out*sizeof(int),SEEK_SET);
                 read(fno,(char *)&data,sizeof(int));
                 buf_out=(buf_out+1)%BUFFSIZE;
-
+                /* TODO*/
+                lseek(fno,10*sizeof(int),SEEK_SET);
+                write(fno,(char *)&buf_out,sizeof(int));
+                
+                /* 写文件操作*/
+                fp =fopen("pc.log","a+");
+                fprintf(fp,"%d:  %d\n",getpid(),data);
+                fclose(fp);
+    		
                 sem_post(mutex);
                 sem_post(empty);
+                /* 
                 printf("%d:  %d\n",getpid(),data);
                 fflush(stdout);
+                sleep(1); */
             }
         } else if(p<0){
             perror("Fail to fork!\n");
@@ -89,6 +108,7 @@ int main(){
     sem_unlink("carmutex");
     /*释放资源*/
     close(fno);
+    
     return 0;
 
 }
