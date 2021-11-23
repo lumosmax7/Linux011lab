@@ -4,7 +4,11 @@
 #include <fcntl.h>
 #include <stdio.h>
 #include <stdlib.h>
-
+/*增加系统调用*/
+_syscall2(sem_t*,sem_open,const char *,name,unsigned int,value);
+_syscall1(int,sem_wait,sem_t*,sem);
+_syscall1(int,sem_post,sem_t*,sem);
+_syscall1(int,sem_unlink,const char *,name);
 
 #define NUMBER 500 /* 设置写入总数的数字是500 */
 #define CHILD 5 /* 自进程，即消费者进程数目 */
@@ -16,17 +20,17 @@
  */
 sem_t *empty,*full,*mutex;
 
-int fno;
+int fno; /*文件描述符*/
 
 int main(){
-    pid_t p_create,p_use;
+    pid_t p;
     int i,j,k;
     int data;
     int buf_out =0; /* 读出缓冲区的指针*/
     int buf_in = 0;/* 写入缓冲区的指针*/
     fno = open("buffer.dat",O_CREAT|O_RDWR|O_TRUNC,0666);  /*后面都是一些定义，权限等*/
     /* 创建三个信号量 */
-    if(mutex = sem_open("carmutex",1)==SEM_FAILED){
+    if((mutex = sem_open("carmutex",1)) == SEM_FAILED){
         perror("sem_open() error!\n");
         return -1;
     }
@@ -42,7 +46,7 @@ int main(){
     }
     /* 返回0说明fork成功，为子进程*/
     /* 生产者进程*/
-    if(p_create = fork()==0){
+    if((p = fork())==0){
         for(i=0;i<NUMBER;i++){
             sem_wait(empty);
             sem_wait(mutex);
@@ -59,7 +63,7 @@ int main(){
         return -1;
     }
     for(j=0;j<CHILD;j++){
-        if((p_use = fork())){
+        if((p = fork())==0){
             /* 五个进程来读，每个进程一次都一个数字，需要多少轮（每轮读5个）*/
             for(k=0;k<NUMBER/CHILD;k++){
                 sem_wait(full);
