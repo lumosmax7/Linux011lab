@@ -44,7 +44,7 @@ int insert_task(struct task_struct *p, sem_queue *q){
 int sem_location(const char *name){
     int i;
     for(i =0;i<SEM_COUNT;i++){
-        if(strcmp(name,semaphores[i].name)==0 && semaphores.occupied==1){
+        if(strcmp(name,semaphores[i].name)==0 && semaphores[i].occupied==1){
             return i;
         }
     }
