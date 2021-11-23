@@ -129,6 +129,37 @@
 #define __NR_ssetmask	69
 #define __NR_setreuid	70
 #define __NR_setregid	71
+/* 这里定义信号量的四个调用 */
+#define __NR_sem_open	72
+#define __NR_sem_wait	73
+#define __NR_sem_post	74
+#define __NR_sem_unlink	75
+
+#define SEM_FAILED  (void*) 0 /*返回0的函数指针，表示没有创建成功，在调用open时判定*/
+#define QUE_LEN 16 /* 信号量请求资源队列的长度 */
+
+/*建立信号量的队列*/
+
+struct semaphore_queue
+{
+	int front;
+	int rear;
+	struct task_struct *wait_tasks[QUE_LEN]; /* 等待的链表 */
+};
+typedef struct semaphore_queue sem_que;
+
+struct semaphore_t
+{
+	int value;  /*请求资源的值*/
+	int occupied;   /* 打开信号量后,该值置为1 */
+	char name[16]; /* 信号量的名称 */
+	struct semaphore_queue wait_queue; /* 信号队列 */
+};
+
+typedef struct semaphore_t sem_t;
+
+
+
 
 #define _syscall0(type,name) \
 type name(void) \
