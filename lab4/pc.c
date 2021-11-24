@@ -47,7 +47,7 @@ int main(){
         perror("sem_open() error!\n");
         return -1;
     }
-    /* TODO*/
+    /* 把读取的位置存在buffsize的最后一个单位, 方便子进程间的通信*/
     lseek(fno,10*sizeof(int),SEEK_SET);
     write(fno,(char *)&buf_out,sizeof(int));
     /* 返回0说明fork成功，为子进程*/
@@ -74,14 +74,14 @@ int main(){
             for(k=0;k<NUMBER/CHILD;k++){
                 sem_wait(full);
                 sem_wait(mutex);
-                /* TODO*/
+                /* 获取要读取的位置*/
                 lseek(fno,10*sizeof(int),SEEK_SET);
                 read(fno,(char *)&buf_out,sizeof(int));
                 /* 读入数字*/
                 lseek(fno,buf_out*sizeof(int),SEEK_SET);
                 read(fno,(char *)&data,sizeof(int));
                 buf_out=(buf_out+1)%BUFFSIZE;
-                /* TODO*/
+                /* 存储下一个要读取的位置*/
                 lseek(fno,10*sizeof(int),SEEK_SET);
                 write(fno,(char *)&buf_out,sizeof(int));
                 
